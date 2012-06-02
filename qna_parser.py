@@ -5,7 +5,7 @@
 import xml.dom.minidom as minidom
 
 #read file and return a tuple of list of questions and answers
-def parse_file(fileName):
+def parse_xml(fileName):
     quesList=[]
     ansList=[]
     doc=minidom.parse(fileName)
@@ -17,7 +17,6 @@ def parse_file(fileName):
         ques_tokened=temp[1:l-1]
         ques_sent=reduce(lambda x,y:x+" "+y,ques_tokened)
         temp=elements.getElementsByTagName("ans")[0].toxml().encode("utf-8").split()
-        l=len(temp)
         ans_sent=temp[1:l-1]
         ans_sent=reduce(lambda x,y:x+' '+y,ans_sent)
         quesList.append(ques_sent)
