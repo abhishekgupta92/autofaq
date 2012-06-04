@@ -78,63 +78,96 @@ class AutoFAQ:
         #Answer queryWords from ansList[qIndex]
         return self._ansList[qIndex]
     
-    def type (self, query):
+    def match_type(self, toMatch, matchWith):
+        matchName = matchWith.nodeName.encode()
+        matchVal = matchWith.childNodes[0].nodeValue.encode()
+        if matchName == 'word':
+            if ('VBP' in matchVal) or ('VBZ' in matchVal):
+                if toMatch == 'VBP' or toMatch == 'VBZ':
+                    return True
+                else:
+                    return False
+            else:
+                if toMatch == matchVal:
+                    return True
+                else:
+                    return False
+        elif matchName == 'tag':
+            if toMatch in matchVal:
+                return True
+            else:
+                return False
+        else:
+            return False                                    
+        
+    def type(self, query):
         query=query.lower().split()
         query_tags=nltk.pos_tag(query)
-        index = 0		
+        index = 0
+        matchDone = False		
         for template in self._templates:
-            tempTags = query_tags[:]
-            parsedTemplate = minidom.parseString('<xml>'+template+'</xml>')
-            for domNode in parsedTemplate.childNodes[0].childNodes:
-                nodeName = domNode.nodeName.encode()
-                textValNode = domNode.childNodes[0].nodeValue.encode()
-                if nodeName == 'word':
-                    if ('VBP' in textValNode) or ('VBZ' in textValNode):
-                        if tempTags[0][1] == 'VBP' or tempTags[0][1] == 'VBZ':
-                            tempTags.pop(0)
+            if not(matchDone):
+                tempTags = query_tags[:]
+                parsedTemplate = minidom.parseString('<xml>'+template+'</xml>')
+                exit = False
+                for domNode in parsedTemplate.childNodes[0].childNodes:
+                    if not(exit):
+                        nodeName = domNode.nodeName.encode()
+                        if nodeName != 'qmark' and nodeName != 'X':
+                            textValNode = domNode.childNodes[0].nodeValue.encode()
+                
+                        if nodeName == 'word':
+                            if ('VBP' in textValNode) or ('VBZ' in textValNode):
+                                if tempTags[0][1] == 'VBP' or tempTags[0][1] == 'VBZ':
+                                    tempTags.pop(0)
+                                else:
+                                    index += 1
+                                    exit = True
+                            else:
+                                if textValNode == tempTags[0][0]:
+                                    tempTags.pop(0)
+                                else:
+                                    index += 1
+                                    exit = True
+                        elif nodeName == 'tag':
+                            if tempTags[0][1] in textValNode:
+                                tempTags.pop(0)
+                            else:
+                                index += 1
+                                exit = True
+                        elif nodeName == 'X':
+                            brother = domNode.nextSibling
+                            brotherName = brother.nodeName.encode()
+                            if brotherName == 'qmark':
+                                tempTags = tempTags[len(tempTags) - 1]
+                            else:
+                                brotherVal = brother.childNodes[0].nodeValue.encode()
+                                tempIndex = 0
+                                while self.match_type(tempTags[tempIndex][0], brother):
+                                    tempIndex += 1
+                                
+                                if tempIndex >= len(tempTags):
+                                    # Exit the function because the query is not well formed. It's missing a question mark.
+                                    print "Sorry your question doesn't seem to be well formed. It seems to be missing a question mark"
+                                    return "".decode()
+                                else:
+                                    tempTags = tempTags[tempIndex:len(tempTags) - 1]
                         else:
-                            index += 1    
-                    else:
-                        if textValNode == tempTags[0][0]:
-                            tempTags.pop(0)
-                        else:
-                            index += 1
-                elif nodeName == 'tag':
-                    if tempTags[0][1] in textValNode:
-                        tempTags.pop(0)
-                    else:
-                        index += 1
-                elif nodeName == 'X':
-                    brother = domNode.nextSibling
-                    brotherName = brother.nodeName.encode()
-                    if brotherName == 'qmark':
-                        tempTags = tempTags[len(tempTags) - 1]
-                    else:
-                        brotherVal = brother.childNodes[0].nodeValue.encode()
-                        tempIndex = 0
-                        while tempTags[tempIndex][0] not in brotherVal and tempIndex <= len(tempTags):
-                            tempIndex += 1
-                            
-                        if tempIndex >= len(tempTags):
-                            # Exit the function because the query is not well formed. It's missing a question mark.
-                            print "Sorry your question doesn't seem to be well formed. It seems to be missing a question mark"
-                            return ""
-                        else:
-                            tempTags = tempTags[tempIndex:len(tempTags) - 1]
-                else:
-                    # This is the case when the tag is <qmark/>
-                    if tempTags[0][0] == '?':
-                        tempTags.pop(0)
-                    else:
-                        print "Sorry your question doesn't seem to be well formed. It seems to be missing a question mark"
-                        return ""
-                            
+                            # This is the case when the tag is <qmark/>
+                            if tempTags[0][0] == '?':
+                                [tempTags].pop(0)
+                                exit = True
+                                matchDone = True
+                            else:
+                                print "Sorry your question doesn't seem to be well formed. It seems to be missing a question mark"
+                                return "".decode()
+        
         if index == len(self._qtypes):
             print "Sorry but your question does not match any question types"
-            return ""
+            return "".decode()
         else:
             print "The type of your question is : ", self._qtypes[index].encode()
-            return self._qtypes[index].encode()                     
+            return self._qtypes[index]                     
                             
      
     def respond(self,query):
@@ -176,5 +209,5 @@ if __name__ == "__main__":
     autofaq=AutoFAQ()
     
     query=raw_input("Please enter your Query\n");
-    #autofaq.type(query);
+    autofaq.type(query);
     autofaq.respond(query);
