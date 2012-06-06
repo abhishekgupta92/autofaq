@@ -82,18 +82,12 @@ class AutoFAQ:
         matchName = matchWith.nodeName.encode()
         matchVal = matchWith.childNodes[0].nodeValue.encode()
         if matchName == 'word':
-            if ('VBP' in matchVal) or ('VBZ' in matchVal):
-                if toMatch == 'VBP' or toMatch == 'VBZ':
-                    return True
-                else:
-                    return False
+            if toMatch[0] == matchVal:
+                return True
             else:
-                if toMatch == matchVal:
-                    return True
-                else:
-                    return False
+                return False
         elif matchName == 'tag':
-            if toMatch in matchVal:
+            if toMatch[1] in matchVal:
                 return True
             else:
                 return False
@@ -117,18 +111,11 @@ class AutoFAQ:
                             textValNode = domNode.childNodes[0].nodeValue.encode()
                 
                         if nodeName == 'word':
-                            if ('VBP' in textValNode) or ('VBZ' in textValNode):
-                                if tempTags[0][1] == 'VBP' or tempTags[0][1] == 'VBZ':
-                                    tempTags.pop(0)
-                                else:
-                                    index += 1
-                                    exit = True
+                            if textValNode == tempTags[0][0]:
+                                tempTags.pop(0)
                             else:
-                                if textValNode == tempTags[0][0]:
-                                    tempTags.pop(0)
-                                else:
-                                    index += 1
-                                    exit = True
+                                index += 1
+                                exit = True
                         elif nodeName == 'tag':
                             if tempTags[0][1] in textValNode:
                                 tempTags.pop(0)
@@ -143,15 +130,14 @@ class AutoFAQ:
                             else:
                                 brotherVal = brother.childNodes[0].nodeValue.encode()
                                 tempIndex = 0
-                                while self.match_type(tempTags[tempIndex][0], brother):
+                                while not(self.match_type(tempTags[tempIndex], brother)):
                                     tempIndex += 1
                                 
                                 if tempIndex >= len(tempTags):
                                     # Exit the function because the query is not well formed. It's missing a question mark.
-                                    print "Sorry your question doesn't seem to be well formed. It seems to be missing a question mark"
                                     return "".decode()
                                 else:
-                                    tempTags = tempTags[tempIndex:len(tempTags) - 1]
+                                    tempTags = tempTags[tempIndex:len(tempTags)]
                         else:
                             # This is the case when the tag is <qmark/>
                             if tempTags[0][0] == '?':
@@ -168,23 +154,91 @@ class AutoFAQ:
         else:
             print "The type of your question is : ", self._qtypes[index].encode()
             return self._qtypes[index]                     
-                            
+
+    def stringPos(self, toSearch, searchIn):
+        index = 0
+        while toSearch != searchIn[index][0]:
+            index += 1
+        return index
+        
+    def tagPos(self, searchIn, tagsList):
+        index = 0
+        while (index < len(searchIn) -1) and not(searchIn[index][1] in tagsList):
+            index += 1
+        return index            
+        
+    # Assumption that the answers in the FAQ files are of positive connotation,
+    # like : "Delhi is capital of India" and not "Delhi is not the capital of USA".
+    # I will work on removing this assumption soon.
+    # @param qtype The Question Type in a Unicode String    
+    def answer_construct(self, qtype, question, answer):
+        ques_type = qtype.encode()
+        asked = nltk.pos_tag(question.lower().split())
+        reply = nltk.pos_tag(answer.lower().split())
+        if ques_type == 'ynq':
+            print asked
+            print reply
+            posIs = self.stringPos('is', asked)
+            # Need to add other tags about which to break. Currently only DT is here.
+            posBreakStart = self.tagPos(asked, 'DT')
+            posOf = self.stringPos('of', asked)
+            print posOf
+            posBreakEnd = self.tagPos(asked, 'CC')
+            print posBreakEnd
+            ansChunkOne = asked[posIs+1:posBreakStart]
+            ansChunkTwo = asked[posOf+1:posBreakEnd]
+            posIs = self.stringPos('is', reply)
+            # Currently using the starting position for the chunk to be the start of the sentence. Have to find some generic method.
+            posOf = self.stringPos('of', reply)
+            posBreakEnd = self.tagPos(reply, 'CC')
+            quesChunkOne = reply[0:posIs]
+            quesChunkTwo = reply[posOf+1:posBreakEnd]
+            
+            print "ansChunkOne :",ansChunkOne
+            print "ansChunkTwo :",ansChunkTwo
+            print "quesChunkOne :",quesChunkOne
+            print "quesChunkTwo :",quesChunkTwo
+            
+            # This is the case when question is say : "Is New Delhi the capital of India ?" and the matched answer is 
+            # "New Delhi is the capital of India". Then answer is yes, because all chunks match           
+            if ansChunkOne == quesChunkOne and ansChunkTwo == quesChunkTwo:
+                print "Case 1"
+                print "Yes"
+            # This is the case when question is say : "Is patna the capital of India ?" and the matched answer is 
+            # "New Delhi is the capital of India". Then {Patna} and {New Delhi} are compared since {India} is common to both
+            elif ansChunkOne != quesChunkOne and ansChunkTwo == quesChunkTwo:
+                print "Case 2"
+                print "No"
+            elif ansChunkOne != quesChunkOne and ansChunkTwo != quesChunkTwo:
+                print "Case 3"
+                print "I don't know, but I know one thing that ", answer
+            # This is the case when question is say : "Is New Delhi the capital of USA ?" and the matched answer is 
+            # "New Delhi is the capital of India". Then {India} and {USA} are compared. Since some states have the same city as
+            # their capitals hence it's not possible to answer correctly.            
+            else:
+                print "Case 4"
+                print "I don't know, but I know one thing that ", answer          
      
     def respond(self,query):
         query=query.lower()
         response=""
         queryWords=tags.give_relevant_words(query)
-        print queryWords
-        #print queryWords
+        print "The Query Words are :", queryWords
         
         # Find the closest match to the answer
         (qIndex,qConf)=self.closest_question(queryWords)
         
         if qIndex!= None and qConf>self.THRESHOLD:
-            print self.answer_from(queryWords,qIndex)
+            print "Hi"
+            res = self.answer_from(queryWords,qIndex)
+            print "Hey"
+            querType = self.type(query)
+            
+            print res
             print "Index :",qIndex
             print "Question closest to your query is :",self._quesList[qIndex],qConf
-
+            print "The response to your question is :"
+            self.answer_construct(querType, query, res)
             #Find Question Word using pos Tagger
             #Find corresponding template
             #In, after
@@ -209,5 +263,6 @@ if __name__ == "__main__":
     autofaq=AutoFAQ()
     
     query=raw_input("Please enter your Query\n");
+    print "The Query given as input is :",query
     autofaq.type(query);
     autofaq.respond(query);

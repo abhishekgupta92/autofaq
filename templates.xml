@@ -3,7 +3,7 @@
   <rule>
     <type>ynq</type>
     <template>
-      <word>VBP;VBZ</word>
+      <tag>VBP;VBZ</tag>
       <tag>NN;NNS;NNP;NNPS;PRP;PRP$</tag>
       <X/>
       <qmark/>
@@ -104,10 +104,20 @@
   <rule>
     <type>ynq</type>
     <template>
-      <word>VBP;VBZ</word>
+      <tag>VBP;VBZ</tag>
       <tag>RB;RBR;RBS</tag>
       <X/>
       <tag>NN;NNS;NNP;NNPS;PRP;PRP$</tag>
+      <X/>
+      <qmark/>
+    </template>
+  </rule>
+  <rule>
+    <type>ynq</type>
+    <template>
+      <tag>VBP;VBZ</tag>
+      <X/>
+      <tag>IN</tag>
       <X/>
       <qmark/>
     </template>
