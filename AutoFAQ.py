@@ -163,28 +163,28 @@ class AutoFAQ:
         
     def tagPos(self, searchIn, tagsList):
         index = 0
-        while (index < len(searchIn) -1) and not(searchIn[index][1] in tagsList):
+        while index < len(searchIn) and not(searchIn[index][1] in tagsList):
             index += 1
         return index            
         
     # Assumption that the answers in the FAQ files are of positive connotation,
     # like : "Delhi is capital of India" and not "Delhi is not the capital of USA".
     # I will work on removing this assumption soon.
-    # @param qtype The Question Type in a Unicode String    
+    # @param qtype The Question Type in a Unicode String  
+    # Some sample questions can be :
+    # "Is patna the capial of India ?"  , "Is Patna the capital of Bihar ?", "Is New Delhi the capital of USA ?" etc
     def answer_construct(self, qtype, question, answer):
         ques_type = qtype.encode()
         asked = nltk.pos_tag(question.lower().split())
         reply = nltk.pos_tag(answer.lower().split())
         if ques_type == 'ynq':
-            print asked
-            print reply
             posIs = self.stringPos('is', asked)
             # Need to add other tags about which to break. Currently only DT is here.
             posBreakStart = self.tagPos(asked, 'DT')
             posOf = self.stringPos('of', asked)
-            print posOf
-            posBreakEnd = self.tagPos(asked, 'CC')
-            print posBreakEnd
+            # Need to add other tags about which I would like to break. The dot is for the question mark tag. The CC tag is for the
+            # "and" in the answer.
+            posBreakEnd = self.tagPos(asked, 'CC;.')
             ansChunkOne = asked[posIs+1:posBreakStart]
             ansChunkTwo = asked[posOf+1:posBreakEnd]
             posIs = self.stringPos('is', reply)
@@ -194,10 +194,6 @@ class AutoFAQ:
             quesChunkOne = reply[0:posIs]
             quesChunkTwo = reply[posOf+1:posBreakEnd]
             
-            print "ansChunkOne :",ansChunkOne
-            print "ansChunkTwo :",ansChunkTwo
-            print "quesChunkOne :",quesChunkOne
-            print "quesChunkTwo :",quesChunkTwo
             
             # This is the case when question is say : "Is New Delhi the capital of India ?" and the matched answer is 
             # "New Delhi is the capital of India". Then answer is yes, because all chunks match           
@@ -211,13 +207,13 @@ class AutoFAQ:
                 print "No"
             elif ansChunkOne != quesChunkOne and ansChunkTwo != quesChunkTwo:
                 print "Case 3"
-                print "I don't know, but I know one thing that ", answer
+                print "I don't know, but I know one thing that,", answer
             # This is the case when question is say : "Is New Delhi the capital of USA ?" and the matched answer is 
             # "New Delhi is the capital of India". Then {India} and {USA} are compared. Since some states have the same city as
             # their capitals hence it's not possible to answer correctly.            
             else:
                 print "Case 4"
-                print "I don't know, but I know one thing that ", answer          
+                print "I don't know, but I know one thing that,", answer          
      
     def respond(self,query):
         query=query.lower()
@@ -229,12 +225,8 @@ class AutoFAQ:
         (qIndex,qConf)=self.closest_question(queryWords)
         
         if qIndex!= None and qConf>self.THRESHOLD:
-            print "Hi"
             res = self.answer_from(queryWords,qIndex)
-            print "Hey"
             querType = self.type(query)
-            
-            print res
             print "Index :",qIndex
             print "Question closest to your query is :",self._quesList[qIndex],qConf
             print "The response to your question is :"
