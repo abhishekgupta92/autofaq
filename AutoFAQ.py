@@ -7,6 +7,7 @@ import qna_parser
 import templateParser
 import sys
 import math
+import re
 import xml.dom.minidom as minidom
 from nltk.corpus import wordnet
 
@@ -26,6 +27,9 @@ class AutoFAQ:
     CLOSENESS_RATIO=0.1
     QUESTION_WORD_TAGS=['WP','WRB']
     SENTENCE_DIVIDERS=['']
+    months=['January','February','March','April','May','June','July','August','September','October','November','December']
+    months_lower=map(lambda a:a.lower(), months)
+
     
     def  __init__(self):
         print("Welcome to AutoFAQ. Initializing AutoFAQ for you ...")
@@ -73,6 +77,93 @@ class AutoFAQ:
             return (scoreList.index(maxScore),maxScore)
         else:
             return (None,None)
+
+    #Look for two digit numbers 0 to 31 and seperated by spaces
+    def getDate(query):
+        query=query.replace(",","");
+        try:
+            date=re.search(r'([1-9]|0[1-9]|[12][0-9]|3[01])\s((j|J)((an|anuary)|(ul|uly))|(m|M)a((r|rch)|y)|(a|A)(ug|ugust)|(o|O)(ct|ctober)|(d|D)(ec|ecember)|(a|A)(pr|pril)|(j|J)(un|une)|((s|S)(ep|eptember)|(n|N)(ov|ovember))|(f|F)(eb|ebruary))\s(1[0-9][0-9][0-9]|2[0-9][0-9][0-9])', query).group(0)
+            #n=re.match(r'(.*)([1-9]|0[1-9]|[12][0-9]|3[01])\s((j|J)((an|anuary)|(ul|uly))|(m|M)a((r|rch)|y)|(a|A)(ug|ugust)|(o|O)(ct|ctober)|(d|D)(ec|ecember)|(a|A)(pr|pril)|(j|J)(un|une)|((s|S)(ep|eptember)|(n|N)(ov|ovember))|(f|F)(eb|ebruary))\s(1[0-9][0-9][0-9]|2[0-9][0-9][0-9])', query).group(1)
+            #date=m[len(n):]
+            s=date.split();
+            return (s[0],s[1],s[2])
+        except:
+            pass
+    
+        try:
+            date=re.search(r'((j|J)((an|anuary)|(ul|uly))|(m|M)a((r|rch)|y)|(a|A)(ug|ugust)|(o|O)(ct|ctober)|(d|D)(ec|ecember)|(a|A)(pr|pril)|(j|J)(un|une)|((s|S)(ep|eptember)|(n|N)(ov|ovember))|(f|F)(eb|ebruary))\s([1-9]|0[1-9]|[12][0-9]|3[01])\s(1[0-9][0-9][0-9]|2[0-9][0-9][0-9])', query).group(0)
+            #n=re.match(r'(.*)((j|J)((an|anuary)|(ul|uly))|(m|M)a((r|rch)|y)|(a|A)(ug|ugust)|(o|O)(ct|ctober)|(d|D)(ec|ecember)|(a|A)(pr|pril)|(j|J)(un|une)|((s|S)(ep|eptember)|(n|N)(ov|ovember))|(f|F)(eb|ebruary))\s([1-9]|0[1-9]|[12][0-9]|3[01])\s(1[0-9][0-9][0-9]|2[0-9][0-9][0-9])', query).group(1)
+            #date=m[len(n):]
+            s=date.split();
+            return (s[1],s[0],s[2])
+        except:
+            pass
+    
+        return (None,None,None) 
+        #re.match(r'(.+)(0[1-9]|[12][0-9]|3[01])\s((j|J)((an|anuary)|(ul|uly))|(m|M)a((r|rch)|y)|(a|A)(ug|ugust)|(o|O)(ct|ctober)|(d|D)(ec|ecember))\s[1-9][0-9]{3}|(0[1-9]|[12][0-9]|30)\s((a|A)(pr|pril)|(j|J)(un|une)|((s|S)(ep|eptember)|(n|N)(ov|ovember)))\s[1-9][0-9]{3}|(0[1-9]|1[0-9]|2[0-8])\s(f|F)(eb|ebruary)\s[1-9][0-9]{3}|29\s(f|F)(eb|ebruary)\s((0[48]|[2468][048]|[13579][26])00|[0-9]{2}(0[48]|[2468][048]|[13579][26]))(.+)',a).group(0)
+
+    def getMonth(query):
+        cnt=0
+        ans=""
+        for i,month in enumerate(months):
+            if query.lower().find(month.lower()) != -1:
+                cnt+=1
+                ans+=month
+        if cnt==1:
+            return ans
+        return None
+
+    def giveYear(query):
+        try:
+            return int(re.search(r'14[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'15[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'16[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'17[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'18[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'19[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'20[0-9][0-9]',query).group(0))
+        except:
+            pass
+
+        try:
+            return int(re.search(r'21[0-9][0-9]',query).group(0))
+        except:
+            pass
+        return None
+
+    def getYear(query):
+        year1=giveYear(query)
+        if year1==None:
+            return None
+
+        query=query.replace(str(year1),"")
+        if giveYear(query)==None:
+            return year1
+        return None
 
     def answer_from(self, queryWords, qIndex):
         #Answer queryWords from ansList[qIndex]
@@ -154,13 +245,16 @@ class AutoFAQ:
         else:
             print "The type of your question is : ", self._qtypes[index].encode()
             return self._qtypes[index]                     
-
+    
+    # Returns the index of a particular string in the POS Tagged list, be it question or answer.
     def stringPos(self, toSearch, searchIn):
         index = 0
         while toSearch != searchIn[index][0]:
             index += 1
         return index
-        
+    
+    # Returns the first index when any of the tags within the given tags list is found in the list to be searched, be it question
+    # or answer. This helps to break the sentence about some tags which are passed as parameter.    
     def tagPos(self, searchIn, tagsList):
         index = 0
         while index < len(searchIn) and not(searchIn[index][1] in tagsList):
@@ -171,12 +265,13 @@ class AutoFAQ:
     # like : "Delhi is capital of India" and not "Delhi is not the capital of USA".
     # I will work on removing this assumption soon.
     # @param qtype The Question Type in a Unicode String  
-    # Some sample questions can be :
-    # "Is patna the capial of India ?"  , "Is Patna the capital of Bihar ?", "Is New Delhi the capital of USA ?" etc
     def answer_construct(self, qtype, question, answer):
         ques_type = qtype.encode()
         asked = nltk.pos_tag(question.lower().split())
         reply = nltk.pos_tag(answer.lower().split())
+        
+        # Some sample questions can be :
+        # "Is patna the capial of India ?"  , "Is Patna the capital of Bihar ?", "Is New Delhi the capital of USA ?" etc
         if ques_type == 'ynq':
             posIs = self.stringPos('is', asked)
             # Need to add other tags about which to break. Currently only DT is here.
@@ -213,7 +308,11 @@ class AutoFAQ:
             # their capitals hence it's not possible to answer correctly.            
             else:
                 print "Case 4"
-                print "I don't know, but I know one thing that,", answer          
+                print "I don't know, but I know one thing that,", answer
+        
+        #elif ques_type == 'time':
+            
+                          
      
     def respond(self,query):
         query=query.lower()
