@@ -8,6 +8,7 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 
 * Checkout the Code
 * Type this into your python shell:
+
        python AutoFAQ.py
 
 ### Dependencies:
@@ -20,12 +21,14 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 After you have installed the NLTK Library, do this to download the NLTK Corpora:
 
 1. Go to your python shell. Type:
+
         nltk.download()
+
 2. Download 
-   * Brown Corpora
-   * Wordnet Corpora
-   * hmm_treebank_pos_tagger Tagger
-   * maxent_treebank_pos_tagger Tagger
+   * **Brown** Corpora
+   * **Wordnet** Corpora
+   * **hmm_treebank_pos_tagger** Tagger
+   * **maxent_treebank_pos_tagger** Tagger
 
 ### Further Information:
 ------------------------
