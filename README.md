@@ -6,7 +6,7 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 ### To Run The Code:
 ----------------
 
-1. Checkout the Code
+1. Checkout the Code.
 2. Type this into your python shell:
 		
 		python AutoFAQ.py
@@ -14,11 +14,11 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 ### Dependencies:
 ----------------
 
-* [Python] (http://www.python.org/)
-* [NLTK Library] (www.nltk.org)
+* [Python] (http://www.python.org)
+* [NLTK Library] (http://www.nltk.org)
 * NLTK Corpora
 
-After you have installed the NLTK Library, do this to download the NLTK Corpora:
+After you have installed the NLTK Library, do the following to download the NLTK Corpora:
 
 1. Go to your python shell. Type:
 
