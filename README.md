@@ -6,10 +6,10 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 ### To Run The Code:
 ----------------
 
-* Checkout the Code
-* Type this into your python shell:
-
-       python AutoFAQ.py
+1. Checkout the Code
+2. Type this into your python shell:
+		
+		python AutoFAQ.py
 
 ### Dependencies:
 ----------------
