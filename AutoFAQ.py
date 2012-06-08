@@ -8,6 +8,7 @@ import templateParser
 import sys
 import math
 import re
+import argparse
 import xml.dom.minidom as minidom
 from nltk.corpus import wordnet
 
@@ -19,6 +20,7 @@ class AutoFAQ:
     _wnl = nltk.WordNetLemmatizer()
     _templates=[]
     _qtypes=[]
+    _debug = False
     WEIGHT_DICTIONARY=0.6
     WEIGHT_STEMMED=0.8
     #Threshold for finding closest question
@@ -29,11 +31,14 @@ class AutoFAQ:
     SENTENCE_DIVIDERS=['']
     months=['January','February','March','April','May','June','July','August','September','October','November','December']
     months_lower=map(lambda a:a.lower(), months)
-
     
     def  __init__(self):
         print("Welcome to AutoFAQ. Initializing AutoFAQ for you ...")
         
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-d","--debug",help="Run the program in debug mode", action="store_true")
+        args = parser.parse_args()
+        self._debug = args.debug
         #Parse the xml
         (self._quesList,self._ansList)=qna_parser.parse_xml("input.xml")
         self._quesList=map(lambda ques:ques.lower(), self._quesList)
@@ -42,8 +47,9 @@ class AutoFAQ:
 
         #Parse the templates
         (self._templates,self._qtypes)=templateParser.parse_xml("templates.xml")
-        print self._templates
-        print self._qtypes
+        if self._debug:
+            print self._templates
+            print self._qtypes
 
     #Score b/w l1 and l2 list of words
     def score(self,l1,l2):
@@ -71,7 +77,8 @@ class AutoFAQ:
         scoreList=map(lambda ques: self.score(queryWords, ques), self._quesListProcessed)
         maxScore=max(scoreList)
 
-        print scoreList
+        if self._debug:
+            print scoreList
         #Check if there are some questions to close to the highest scoring function in the scoreList
         if (len(filter(lambda x: x>= maxScore-self.CLOSENESS_THRESHOLD, scoreList)) < len(self._quesList)*self.CLOSENESS_RATIO ):
             return (scoreList.index(maxScore),maxScore)
@@ -243,7 +250,6 @@ class AutoFAQ:
             print "Sorry but your question does not match any question types"
             return "".decode()
         else:
-            print "The type of your question is : ", self._qtypes[index].encode()
             return self._qtypes[index]                     
     
     # Returns the index of a particular string in the POS Tagged list, be it question or answer.
@@ -369,7 +375,6 @@ class AutoFAQ:
         query=query.lower()
         response=""
         queryWords=tags.give_relevant_words(query)
-        print "The Query Words are :", queryWords
         
         # Find the closest match to the answer
         (qIndex,qConf)=self.closest_question(queryWords)
@@ -377,8 +382,12 @@ class AutoFAQ:
         if qIndex!= None and qConf>self.THRESHOLD:
             res = self.answer_from(queryWords,qIndex)
             querType = self.type(query)
-            print "Index :",qIndex
-            print "Question closest to your query is :",self._quesList[qIndex],qConf
+            print "The type of your question is : ", querType
+            if self._debug:
+                print "The Query Words are :", queryWords
+                print "Index :",qIndex
+            print "Question closest to your query is :",self._quesList[qIndex]
+            print "The confidence that I have regarding this question match is :", qConf
             print "The response to your question is :"
             self.answer_construct(querType, query, res)
             #Find Question Word using pos Tagger
@@ -405,6 +414,7 @@ if __name__ == "__main__":
     autofaq=AutoFAQ()
     
     query=raw_input("Please enter your Query\n");
-    print "The Query given as input is :",query
+    if autofaq._debug:
+        print "The Query given as input is :",query
     autofaq.type(query);
     autofaq.respond(query);

@@ -7,7 +7,7 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 ----------------
 
 1. Checkout the Code.
-2. Type this into your python shell:
+2. Type this into your native shell:
 		
 		python AutoFAQ.py
 
