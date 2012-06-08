@@ -1,20 +1,33 @@
 AutoFAQ
-====
+=========
 
 Developing a system with multi-lingual capabilities in order to receive answer to user specific queries
 
-TO RUN:
-Checkout the Code
-python AutoFAQ.py
+### To Run The Code:
+----------------
 
-DEPENDENCIES:
--> Python
--> NLTK Library (www.nltk.org)
--> NLTK Corpora
-	To Download
-	Go to python shell. Type
-	>>> nltk.download()
-	Download brown, wordnet, hmm_treebank_pos_tagger and maxent_treebank_pos_tagger
+* Checkout the Code
+* Type this into your python shell:
+       python AutoFAQ.py
 
-Blog Posts
-http://abhishek.cc/category/gsoc
+### Dependencies:
+----------------
+
+* [Python] (http://www.python.org/)
+* [NLTK Library] (www.nltk.org)
+* NLTK Corpora
+
+After you have installed the NLTK Library, do this to download the NLTK Corpora:
+
+1. Go to your python shell. Type:
+        nltk.download()
+2. Download 
+   * Brown Corpora
+   * Wordnet Corpora
+   * hmm_treebank_pos_tagger Tagger
+   * maxent_treebank_pos_tagger Tagger
+
+### Further Information:
+------------------------
+
+- [Blog] (http://abhishek.cc/category/gsoc)
