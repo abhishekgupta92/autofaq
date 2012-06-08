@@ -4,6 +4,16 @@
     <ques> What is the capital of India? </ques>
     <ans> New Delhi is capital of India </ans>
   </qna>
+  
+  <qna>
+    <ques> What is the procedure to get rid of caffeine ?</ques>
+    <ans> Nicotine patches are used to get rid of caffeine </ans>
+  </qna>
+
+  <qna>
+    <ques> What is the procedure to make coffee ?</ques>
+    <ans> Coffee is made using coffee beans </ans>
+  </qna>
 
   <qna>
     <ques> What is the Currency of India? </ques>

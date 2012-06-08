@@ -96,7 +96,7 @@
     <type>prc</type>
     <template>
       <word>how</word>
-      <tag>VBP;VBZ</tag>
+      <tag>VBP;VBZ;MD</tag>
       <X/>
       <qmark/>
     </template>

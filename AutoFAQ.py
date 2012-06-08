@@ -260,6 +260,38 @@ class AutoFAQ:
         while index < len(searchIn) and not(searchIn[index][1] in tagsList):
             index += 1
         return index            
+    
+    # Returns the tagsList after removing tags which are in the blackListed tags list
+    # @param blackList The list of tags which have to be excluded from the tagsList
+    # @param tagsList The list of tags which has to processed.
+    def filterUseless(self, tagsList, blackList):
+        index = 0
+        toReturn = []
+        while index <len(tagsList):
+            if not(tagsList[index][1] in blackList):
+                toReturn.append(tagsList[index])
+            index += 1
+        return toReturn    
+    
+    # Returns boolean depending on whether the given tagsList pattern matches another tagsList pattern
+    # It basically looks for the existence of all the tags individually in the other block    
+    # @param toMatch This is the pattern to be matched
+    # @param pattern This is the pattern with which to match
+    def isMatch(self, toMatch, pattern):
+        indexOne = 0
+        exit = False
+        match = False
+        toReturn = True
+        while indexOne < len(toMatch) and not(exit):
+            for elem in pattern:
+                if toMatch[indexOne][0] == elem[0]:
+                    match = True
+            if not(match):
+                exit = True
+                toReturn = False
+            indexOne += 1
+        
+        return toReturn                    
         
     # Assumption that the answers in the FAQ files are of positive connotation,
     # like : "Delhi is capital of India" and not "Delhi is not the capital of USA".
@@ -310,7 +342,26 @@ class AutoFAQ:
                 print "Case 4"
                 print "I don't know, but I know one thing that,", answer
         
-        #elif ques_type == 'time':
+        elif ques_type == 'prc':
+            # The 'MD' is for 'can', 'VBZ' is for 'is'
+            posBreakPoint = self.tagPos(asked, 'MD;VBZ')
+            quesChunkOne = asked[posBreakPoint+1:len(asked)]
+            # 'VB' is for 'I','get' and 'VBN' is for 'done'
+            # NOTE: While filtering it depends whether we want to filter something.
+            # For example 'How is coffee made ?', then 'made' is useful to distinguish the part of the answer which contains
+            # to the question
+            filteredList = self.filter(quesChunkOne, 'VB;VBN')
+            # 'VBG' is for 'using', 'IN' is for 'by', 'VBN' is for 'used'
+            posBreakAns = self.tagPos(reply, 'VBN;VBG;IN')
+            ansChunkOne = reply[0:posBreakAns]
+            ansChunkTwo = reply[posBreakAns+1:len(reply)]
+            
+            doesItMatch = self.isMatch(quesChunkOne, ansChunkOne)
+            
+            if doesItMatch:
+                print "Well the method is,", ansChunkTwo
+            else:
+                print ansChunkOne    
             
                           
      
