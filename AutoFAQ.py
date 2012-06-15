@@ -38,8 +38,8 @@ class AutoFAQ:
         self._debug = args.debug
         #Parse the xml
         (self._quesList,self._ansList)=qna_parser.parse_xml("input.xml")
-        self._quesList=map(lambda ques:ques.lower(), self._quesList)
-        self._ansList=map(lambda ques:ques.lower(), self._ansList)
+        #self._quesList=map(lambda ques:ques.lower(), self._quesList)
+        #self._ansList=map(lambda ques:ques.lower(), self._ansList)
         self._quesListProcessed = map(lambda q:tags.give_relevant_words(q), self._quesList)
 
         #Parse the templates
@@ -161,125 +161,6 @@ class AutoFAQ:
             return "".decode()
         else:
             return self._qtypes[index]                     
-    
-    # Returns the index of a particular string in the POS Tagged list, be it question or answer.
-    def stringPos(self, toSearch, searchIn):
-        index = 0
-        while toSearch != searchIn[index][0]:
-            index += 1
-        return index
-    
-    # Returns the first index when any of the tags within the given tags list is found in the list to be searched, be it question
-    # or answer. This helps to break the sentence about some tags which are passed as parameter.    
-    def tagPos(self, searchIn, tagsList):
-        index = 0
-        while index < len(searchIn) and not(searchIn[index][1] in tagsList):
-            index += 1
-        return index            
-    
-    # Returns the tagsList after removing tags which are in the blackListed tags list
-    # @param blackList The list of tags which have to be excluded from the tagsList
-    # @param tagsList The list of tags which has to processed.
-    def filterUseless(self, tagsList, blackList):
-        index = 0
-        toReturn = []
-        while index <len(tagsList):
-            if not(tagsList[index][1] in blackList):
-                toReturn.append(tagsList[index])
-            index += 1
-        return toReturn    
-    
-    # Returns boolean depending on whether the given tagsList pattern matches another tagsList pattern
-    # It basically looks for the existence of all the tags individually in the other block    
-    # @param toMatch This is the pattern to be matched
-    # @param pattern This is the pattern with which to match
-    def isMatch(self, toMatch, pattern):
-        indexOne = 0
-        exit = False
-        match = False
-        toReturn = True
-        while indexOne < len(toMatch) and not(exit):
-            for elem in pattern:
-                if toMatch[indexOne][0] == elem[0]:
-                    match = True
-            if not(match):
-                exit = True
-                toReturn = False
-            indexOne += 1
-        
-        return toReturn                    
-        
-    # Assumption that the answers in the FAQ files are of positive connotation,
-    # like : "Delhi is capital of India" and not "Delhi is not the capital of USA".
-    # I will work on removing this assumption soon.
-    # @param qtype The Question Type in a Unicode String  
-    def answer_construct(self, qtype, question, answer):
-        ques_type = qtype.encode()
-        asked = nltk.pos_tag(question.lower().split())
-        reply = nltk.pos_tag(answer.lower().split())
-        
-        # Some sample questions can be :
-        # "Is patna the capial of India ?"  , "Is Patna the capital of Bihar ?", "Is New Delhi the capital of USA ?" etc
-        if ques_type == 'ynq':
-            posIs = self.stringPos('is', asked)
-            # Need to add other tags about which to break. Currently only DT is here.
-            posBreakStart = self.tagPos(asked, 'DT')
-            posOf = self.stringPos('of', asked)
-            # Need to add other tags about which I would like to break. The dot is for the question mark tag. The CC tag is for the
-            # "and" in the answer.
-            posBreakEnd = self.tagPos(asked, 'CC;.')
-            ansChunkOne = asked[posIs+1:posBreakStart]
-            ansChunkTwo = asked[posOf+1:posBreakEnd]
-            posIs = self.stringPos('is', reply)
-            # Currently using the starting position for the chunk to be the start of the sentence. Have to find some generic method.
-            posOf = self.stringPos('of', reply)
-            posBreakEnd = self.tagPos(reply, 'CC')
-            quesChunkOne = reply[0:posIs]
-            quesChunkTwo = reply[posOf+1:posBreakEnd]
-            
-            
-            # This is the case when question is say : "Is New Delhi the capital of India ?" and the matched answer is 
-            # "New Delhi is the capital of India". Then answer is yes, because all chunks match           
-            if ansChunkOne == quesChunkOne and ansChunkTwo == quesChunkTwo:
-                print "Case 1"
-                print "Yes"
-            # This is the case when question is say : "Is patna the capital of India ?" and the matched answer is 
-            # "New Delhi is the capital of India". Then {Patna} and {New Delhi} are compared since {India} is common to both
-            elif ansChunkOne != quesChunkOne and ansChunkTwo == quesChunkTwo:
-                print "Case 2"
-                print "No"
-            elif ansChunkOne != quesChunkOne and ansChunkTwo != quesChunkTwo:
-                print "Case 3"
-                print "I don't know, but I know one thing that,", answer
-            # This is the case when question is say : "Is New Delhi the capital of USA ?" and the matched answer is 
-            # "New Delhi is the capital of India". Then {India} and {USA} are compared. Since some states have the same city as
-            # their capitals hence it's not possible to answer correctly.            
-            else:
-                print "Case 4"
-                print "I don't know, but I know one thing that,", answer
-        
-        elif ques_type == 'prc':
-            # The 'MD' is for 'can', 'VBZ' is for 'is'
-            posBreakPoint = self.tagPos(asked, 'MD;VBZ')
-            quesChunkOne = asked[posBreakPoint+1:len(asked)]
-            # 'VB' is for 'I','get' and 'VBN' is for 'done'
-            # NOTE: While filtering it depends whether we want to filter something.
-            # For example 'How is coffee made ?', then 'made' is useful to distinguish the part of the answer which contains
-            # to the question
-            filteredList = self.filter(quesChunkOne, 'VB;VBN')
-            # 'VBG' is for 'using', 'IN' is for 'by', 'VBN' is for 'used'
-            posBreakAns = self.tagPos(reply, 'VBN;VBG;IN')
-            ansChunkOne = reply[0:posBreakAns]
-            ansChunkTwo = reply[posBreakAns+1:len(reply)]
-            
-            doesItMatch = self.isMatch(quesChunkOne, ansChunkOne)
-            
-            if doesItMatch:
-                print "Well the method is,", ansChunkTwo
-            else:
-                print ansChunkOne    
-            
-                          
      
     def respond(self,query):
         query=query.lower()
@@ -296,10 +177,9 @@ class AutoFAQ:
             if self._debug:
                 print "The Query Words are :", queryWords
                 print "Index :",qIndex
-            print "The question in the FAQ, which is closest to your query is :",self._quesList[qIndex]
+            print "The closest question in the FAQ is :",self._quesList[qIndex]
             print "The confidence that I have regarding this question match is :", qConf
-            print "The response to your question is :"
-            self.answer_construct(querType, query, res)
+            print "The answer in the FAQ is :",res
             #Find Question Word using pos Tagger
             #Find corresponding template
             #In, after

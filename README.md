@@ -4,7 +4,7 @@ AutoFAQ
 Developing a system with multi-lingual capabilities in order to receive answer to user specific queries
 
 ### To Run The Code:
-----------------
+-------------------
 
 1. Checkout the Code.
 2. Type this into your native shell:
@@ -31,6 +31,6 @@ After you have installed the NLTK Library, do the following to download the NLTK
    * **maxent_treebank_pos_tagger** Tagger
 
 ### Further Information:
-------------------------
+-----------------------
 
 - [Blog] (http://abhishek.cc/category/gsoc)

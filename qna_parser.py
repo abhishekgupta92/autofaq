@@ -9,16 +9,10 @@ def parse_xml(fileName):
     quesList=[]
     ansList=[]
     doc=minidom.parse(fileName)
-    faq=doc.getElementsByTagName('xml')
-    qna=faq[0].getElementsByTagName('qna')
-    for elements in qna:
-        temp=elements.getElementsByTagName("ques")[0].toxml().encode("utf-8").split()
-        l=len(temp)
-        ques_tokened=temp[1:l-1]
-        ques_sent=reduce(lambda x,y:x+" "+y,ques_tokened)
-        temp=elements.getElementsByTagName("ans")[0].toxml().encode("utf-8").split()
-        ans_sent=temp[1:l-1]
-        ans_sent=reduce(lambda x,y:x+' '+y,ans_sent)
+    faq=doc.getElementsByTagName('xml')[0].getElementsByTagName('qna')
+    for elements in faq:
+        ques_sent=elements.getElementsByTagName("ques")[0].childNodes[0].nodeValue
+        ans_sent=elements.getElementsByTagName("ans")[0].childNodes[0].nodeValue
         quesList.append(ques_sent)
         ansList.append(ans_sent)
     return (quesList,ansList)
