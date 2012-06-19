@@ -17,11 +17,14 @@ def parse_xml(fileName):
         ansList.append(ans_sent)
     return (quesList,ansList)
 
-#	def return_list_of_questions
-#	def return_list_of_answers
-#	def read_first_question
-#	def read_next_question
-#	def read_nth_question
-#	def read_first_answer
-#	def read_next_answer
-#	def read_nth_answer
+
+if __name__ == "__main__":
+    quesList=[]
+    ansList=[]
+    (quesList,ansList)=parse_xml("input.xml")
+    print "First Q/A Pair"
+    print "Q:",quesList[0]
+    print "A:",ansList[0]
+    print "Last Q/A Pair"
+    print "Q:",quesList[len(quesList)-1]
+    print "A:",ansList[len(quesList)-1]

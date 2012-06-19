@@ -22,3 +22,12 @@ def parse_xml(fileName):
             typeList.append(qtype);
 
     return (templateList,typeList)
+
+if __name__ == "__main__":
+    (templateList,typeList)=parse_xml("templates.xml")
+    print "First Pair"
+    print "Template:",templateList[0]
+    print "Type:",typeList[0]
+    print "Last Pair"
+    print "Template:",templateList[-1:][0]
+    print "Type:",typeList[-1:][0]

@@ -16,6 +16,7 @@ Developing a system with multi-lingual capabilities in order to receive answer t
 
 * [Python] (http://www.python.org)
 * [NLTK Library] (http://www.nltk.org)
+* Numpy Library (required by nltk)
 * NLTK Corpora
 
 After you have installed the NLTK Library, do the following to download the NLTK Corpora:
