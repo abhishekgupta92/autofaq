@@ -11,3 +11,5 @@ templateFile="templates.xml"
 faqFile="input.xml"
 similarity_matrix_file="ques_similarity_matrix.txt"
 
+MIN_THRESHOLD=0.2
+tempStorage="wiki_data/"
