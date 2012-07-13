@@ -9,7 +9,7 @@ def get_matrix_english(fileName):
     
     #Remove all the hashes
     ls=filter(lambda line: '#' not in line, ls)
-    ls=map(lambda line: line.replace("\n",""), ls)
+    ls=map(lambda line: line.replace("\n","").replace("\r",""), ls)
     ls=map(lambda line: line.split(";"), ls)
     
     #Assumption tags in first line

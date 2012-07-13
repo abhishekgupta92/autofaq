@@ -250,7 +250,21 @@ class AutoFAQ:
             return self._qtypes[index]
         except:
             return None
-     
+    
+    def closest_question_index (self,query):
+        query=query.lower()
+        queryWords=self.preprocess_query(query)
+        typeScore=map(lambda ques: self.ques_type_score(query, ques), self._quesList)
+        coverageScore=map(lambda ques: self.coverage_score(queryWords, ques), self._quesListProcessed)
+        semanticScore=map(lambda ques: self.semantic_similarity(queryWords, ques), self._quesListProcessed)
+        termVectorScore=map(lambda ques: self.term_vector_similarity(queryWords, ques), self._quesListProcessed)
+        scoreList=[]
+        for i in xrange(len(typeScore)):
+            scoreList.append(0.25*(float(typeScore[i])+float(coverageScore[i])+float(semanticScore[i])+float(termVectorScore[i])))
+			
+        return self._quesList[scoreList.index(max(scoreList))]
+
+		
     def respond(self,query):
         query=query.lower()
         response=""
@@ -261,10 +275,9 @@ class AutoFAQ:
 
         #Only typeScore takes the query, all other takes the processed query and the words
         typeScore=map(lambda ques: self.ques_type_score(query, ques), self._quesList)
-        
         coverageScore=map(lambda ques: self.coverage_score(queryWords, ques), self._quesListProcessed)
         semanticScore=map(lambda ques: self.semantic_similarity(queryWords, ques), self._quesListProcessed)
-        termVectorScore=map(lambda ques: self.term_vector_similarity(queryWords, ques), self._quesListProcessed)
+        termVectorScore=map(lambda ques: self.term_vector_similarity(queryWords, ques), self._quesListProcessed)		
         
         scoreList=[]
         for i in xrange(len(typeScore)):
